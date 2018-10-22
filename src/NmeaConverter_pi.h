@@ -100,9 +100,14 @@ public:
     PreferenceDlg* prefDlg;
     MapOfnmeaSendObj ObjectMap;
     bool b_CheckChecksum;
+    wxString getConstantName(int i) { return constantNameArray[i]; }
+    wxString getConstantVal(int i) { return constantValArray[i]; }
+    int getNumConsts( void ) { return constantNameArray.size(); }
 private:
     wxArrayString nmeaSentenceArray;
     wxArrayString nmeaIDArray;
+    wxArrayString constantNameArray;
+    wxArrayString constantValArray;
     wxFileConfig* m_pconfig;     
 };
 

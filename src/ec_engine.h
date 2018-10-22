@@ -51,7 +51,7 @@
  * When the object is created, the radian mode is activated and you can compute directly.
  * To do it, see the sample written on the main page of this documentation.
  */
-class WXDLLEXPORT wxEcEngine
+class wxEcEngine
 {
 
     private:

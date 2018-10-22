@@ -591,7 +591,7 @@ static bool wxEcBetween(unsigned int value, unsigned int lowlimit, unsigned int 
  * This class is similar to wxPoint but stores unsigned values
  * and arithmetic operators have been removed.
  */
-class WXDLLEXPORT wxEcUPoint
+class wxEcUPoint
 {
     public:
         unsigned int x;     /**< X. */

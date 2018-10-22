@@ -56,7 +56,9 @@ int NmeaConverter_pi::Init(void)
 bool NmeaConverter_pi::DeInit(void)
 {
     for( objit = ObjectMap.begin(); objit != ObjectMap.end(); ++objit )
-                objit->second->~nmeaSendObj();    
+                objit->second->~nmeaSendObj();
+    constantNameArray.Empty();
+    constantValArray.Empty();
     return true;
 }
 
@@ -221,6 +223,7 @@ bool NmeaConverter_pi::SaveConfig( void )
         pConf->SetPath( _T("/PlugIns/NmeaConverter") );
         pConf->Write( _T("DoUseCheckSums"), b_CheckChecksum );
         pConf->Write( _T("ObjectCount" ), count );
+        pConf->Write(_T("constantCount"), getNumConsts());
         for( objit = ObjectMap.begin(); objit != ObjectMap.end(); ++objit )
         {
             nmeaSendObj* CurrObj = objit->second;
@@ -230,6 +233,13 @@ bool NmeaConverter_pi::SaveConfig( void )
             pConf->Write( _T("RepeatTime"),int(CurrObj->GetRepeatTime() ) );
             pConf->Write( _T("CalcDegrees"),bool(CurrObj->UseDegrees ) );
             i++;
+        }
+        i = 1;
+        for (i = 1; i < getNumConsts(); ++i)
+        {
+            pConf->SetPath(wxString::Format(_T("/PlugIns/NmeaConverter/Constant%d"), i));
+            pConf->Write(_T("ConstantName"), getConstantName(i));
+            pConf->Write(_T("ConstantVal"), getConstantVal(i));
         }
         return true;
     } else
@@ -245,6 +255,8 @@ bool NmeaConverter_pi::LoadConfig( void )
         pConf->Read( _T("DoUseCheckSums"), &b_CheckChecksum, true );
         int o_cnt;
         pConf->Read( _T("ObjectCount"), &o_cnt, -1 );
+        int c_cnt;
+        pConf->Read(_T("ConstantCount"), &c_cnt, -1);
         ClearAllObjectsInMap();
         for( int i = 1; i <= o_cnt; i++ )
         {
@@ -259,6 +271,19 @@ bool NmeaConverter_pi::LoadConfig( void )
             pConf->Read( _T("CalcDegrees"), &UseDeg, false );
               AddObjectToMap( new nmeaSendObj( this, FormatS), SentenceSendMode(SendModeInt), RepTime, UseDeg  );
             
+        }
+        pConf->SetPath(_T("/PlugIns/NmeaConverter"));
+        constantNameArray.Empty();
+        constantValArray.Empty();
+        for (int i = 1; i <= c_cnt; i++)
+        {
+            pConf->SetPath(wxString::Format(_T("/PlugIns/NmeaConverter/Constant%d"), i));
+            wxString ConstantS;
+            pConf->Read(_T("ConstantName"), &ConstantS, wxEmptyString);
+            constantNameArray.Add(ConstantS);
+            wxString ValS;
+            pConf->Read(_T("ConstantVal"), &ValS, wxEmptyString);
+            constantValArray.Add(ValS);
         }
         return true;
     } else
@@ -439,6 +464,13 @@ void nmeaSendObj::ComputeOutputSentence()
         }
         wxString result;
         wxEcEngine calc;
+        for (int iConst = 0; iConst < plugin->getNumConsts(); iConst++)
+        {
+            wxString val = plugin->getConstantVal(iConst);
+            double dVal;
+            if (val.ToDouble(&dVal))
+                calc.SetConstant(plugin->getConstantName(iConst), dVal);
+        }
         if (UseDegrees) calc.SetTrigonometricMode(wxECA_DEGREE);
         if (calc.SetFormula( formattokenarray[j] ))
         {

@@ -520,6 +520,13 @@ bool wxEcEngine::ApplyFunction(wxString *function, double *value)
         case 6579559: //deg
             *value = *value * 180.0 / M_PI;
             break;
+        case 6582887: //drg same as deg but bounds to positive angle
+            while(*value < 0)
+                *value = *value + 2 * M_PI;
+            while(*value > 2 * M_PI)
+                *value = *value - 2 * M_PI;
+            *value = *value * 180.0 / M_PI;
+            break;
         case 7496036: //rad
             *value = *value / 180.0 * M_PI;
             break;
@@ -704,7 +711,9 @@ double wxEcEngine::evalf(wxString *expression)
         else
             if (!GetConstant(value, &(m_pool[terms])))
                 break;
-        poolSign.Append(buffer.GetChar(index));
+        if ( index < buffer.length() ) {
+            poolSign.Append(buffer.GetChar(index));
+        }
         buffer = buffer.Mid(index+1);
         terms++;
 
