@@ -234,7 +234,6 @@ bool NmeaConverter_pi::SaveConfig( void )
             pConf->Write( _T("CalcDegrees"),bool(CurrObj->UseDegrees ) );
             i++;
         }
-        i = 1;
         for (i = 1; i < getNumConsts(); ++i)
         {
             pConf->SetPath(wxString::Format(_T("/PlugIns/NmeaConverter/Constant%d"), i));
